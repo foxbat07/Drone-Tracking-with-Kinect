@@ -6,6 +6,8 @@
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>A296F8E8-5958-4BD1-9B0C-9857623C49BD</string>
+	<key>IDESourceControlProjectName</key>
+	<string>kdt</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>37526DA425E5430474A14FBFA1BC4525160B5FC1</key>
@@ -14,24 +16,38 @@
 		<string>https://github.com/obviousjim/ofxSTL.git</string>
 		<key>7E804D925461714118DB355C65BC964B41D94376</key>
 		<string>https://github.com/rezaali/ofxUI.git</string>
+		<key>DA3DFDC75E53B2628E88A6AA4D7E0A83368B684D</key>
+		<string>https://github.com/mohithingorani/Kinect-Drone-Tracking-.git</string>
 	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>kdt.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>37526DA425E5430474A14FBFA1BC4525160B5FC1</key>
-		<string>ofxCv/</string>
+		<string>../../../../../addons/ofxCv</string>
 		<key>5F5760DC1D7D368197EA46F58434F82594C6401E</key>
-		<string>ofxSTL/</string>
+		<string>../../../../../addons/ofxSTL</string>
 		<key>7E804D925461714118DB355C65BC964B41D94376</key>
-		<string>ofxUI/</string>
+		<string>../../../../../addons/ofxUI</string>
+		<key>DA3DFDC75E53B2628E88A6AA4D7E0A83368B684D</key>
+		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://github.com/obviousjim/ofxSTL.git</string>
+	<string>https://github.com/mohithingorani/Kinect-Drone-Tracking-.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>5F5760DC1D7D368197EA46F58434F82594C6401E</string>
+	<string>DA3DFDC75E53B2628E88A6AA4D7E0A83368B684D</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>DA3DFDC75E53B2628E88A6AA4D7E0A83368B684D</string>
+			<key>IDESourceControlWCCName</key>
+			<string>kinectDroneTracking</string>
+		</dict>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>

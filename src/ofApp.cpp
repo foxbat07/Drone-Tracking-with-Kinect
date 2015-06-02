@@ -9,7 +9,7 @@ void ofApp::setup() {
 	//kinect.init(false, false); // disable video image (faster fps)
 	kinect.open();		// opens first available kinect
     
-    
+    droneImage.loadImage("droneImage.jpg");
     debugWindow.setup("debug Window", 0, 0, 1280/2, 960/2, false);
     
     //setting up the kinect CV images
@@ -122,7 +122,7 @@ void ofApp::setup() {
     gui1->addLabel("contours");
     gui1->addSpacer();
     gui1->addSlider("minArea", 0, 5000, &minArea);
-    gui1->addSlider("maxArea", 5000, 500000, &maxArea);
+    gui1->addSlider("maxArea", 5000, 50000, &maxArea);
     gui1->addSlider("threshold", 1, 100, &threshold);
     gui1->addSlider("persistence", 1, 100, &persistence);
     gui1->addSlider("maxDistance", 1, 100, &maxDistance);
@@ -133,6 +133,8 @@ void ofApp::setup() {
     gui1->addSlider("left Threshold", 0, 1000, &kLeftThreshold);
     gui1->addSlider("right Threshold", -1000, 0, &kRightThreshold);
     gui1->addSlider("colorMapping", 10, 2000, &colorMapping);
+    
+    gui1->addSlider("strip width", 2, 10,  &stripWidth );
   
     gui1->addToggle("isTrackingOn", false);
     
@@ -171,31 +173,14 @@ void ofApp::update() {
                                 
                             mesh.addColor(c);
                             mesh.addVertex(kinect.getWorldCoordinateAt(i, j) );
-                            if( writingToFile)
-                                addPointsToFile(kinect.getWorldCoordinateAt(i, j));
-                            //cout<<kinect.getWorldCoordinateAt(i, j) <<endl;
-                            }
-                        
-                        //if( isTrackingOn && isItIn)
-                        if(record && isItIn)
-                            {
-                            tempMesh.addVertex(kinect.getWorldCoordinateAt(i, j));
-                            
-                            }
+                                                       }
+                
 
                     }
  
             }
     
-    if ( isTrackingOn)
-    {
-        trackingMesh.append(mesh);
-        tempMesh.clearVertices();
-    }
     
-    
-    
-    record = false;
     kinectDepthImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
     kinectThresholdedImage = kinectDepthImage;
     
@@ -209,10 +194,68 @@ void ofApp::update() {
     
     // determine found contours
     contourFinder.findContours(kinectThresholdedImage);
+    droneRects =  contourFinder.getBoundingRects();
+    
+    kinectThresholdMat = toCv(kinectThresholdedImage.getPixelsRef());
+    droneMats.clear();
+    globalDroneAverages.clear();
 
     
-
+    for ( int i = 0 ; i < droneRects.size() ; i++ )
+    {
+        //droneMats[i] = kinectThresholdMat(droneRects[i]);
+        Mat tempMat;
+        kinectThresholdMat(droneRects[i]).copyTo(tempMat);
+        droneMats.push_back(tempMat);
+        
+    }
     
+    
+    for ( int  i = 0 ; i < droneMats.size() ; i ++)
+    {
+        
+        vector< Scalar > droneAverages;
+        vector<Mat> droneAverageMats;
+        droneAverages.clear();
+        
+        Scalar oldAvg( 0);
+        Scalar curAvg;
+        Scalar gradient;
+        
+        cout<<endl<< "gradient: ";
+
+        
+        for ( int j = 0 ; j< droneMats[i].cols- int(stripWidth)  ; j+= int(stripWidth) )
+        {
+            Mat tempMat;
+            
+            droneMats[i]( cv::Rect(j,0,int(stripWidth) ,droneMats[i].rows-1)).copyTo(tempMat);
+            
+            curAvg = mean(tempMat);
+            
+            droneAverages.push_back( curAvg );
+            
+            gradient = curAvg - oldAvg;
+            cout<<" " << gradient.val[0];
+            
+            globalDroneAverages.push_back(droneAverages);
+            //droneAverages.push_back(  mean(droneMats[i]( cv::Rect(j,0,5,droneMats[i].rows) ) ) ) ;
+            
+            
+            oldAvg = curAvg;
+            
+        }
+        
+        
+    }
+    
+    //cout<<endl<<"size of the vector: " << globalDroneAverages.size() << endl;
+    
+    
+    
+    
+//    contourFinder.size();
+
 #ifdef USE_TWO_KINECTS
 	kinect2.update();
 #endif
@@ -224,19 +267,32 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
     
-    kinectDepthImage.draw(640,480);
-    kinectThresholdedImage.draw(640,0);
+    kinectDepthImage.draw(0,480);
+    kinectThresholdedImage.draw(0,0);
     ofPushMatrix();
-    ofTranslate(640,0);
+    ofTranslate(0,0);
     contourFinder.draw();
     ofPopMatrix();
     
+    /*
+    if ( droneRects.size()!=0)
+    {
+        for (int i = 0 ; i < droneRects.size() ; i++)
+        {
+            cout<<endl<< "point i:  "<< i << " " << droneRects[i].tl().x <<" "<< droneRects[i].tl().y<<" " << droneRects[i].br().x <<" "<< droneRects[i].br().y <<endl ;
+            
+        }
+    }
+     */
+    
+    ofPushMatrix();
+    //ofTranslate(640,0);
+    for ( int i = 0 ; i < droneMats.size(); i++)
+        drawMat(droneMats[i], 640, i * 200);
+    
+    
+    ofPopMatrix();
     ofDrawBitmapString( ofToString(record) , 20, 400);
-   
-    
-    
-    
-    
     debugWindow.begin();
     ofBackground(0, 0, 0);
     glPointSize(1);
@@ -252,15 +308,10 @@ void ofApp::draw() {
     //kinect.draw(0, 0, 640, 480);
     //kinect.drawDepth(0, 0, 640, 480);
     
-    
     ofDisableDepthTest();
     ofPopMatrix();
     easyCam.end();
-
     debugWindow.end();
-    
-    
-    
 }
 
 
@@ -282,9 +333,7 @@ void ofApp::keyPressed (int key) {
         case'w':
             writingToFile = !writingToFile;
             break;
-        case'm':
-            recordMesh();
-        
+            
         case 'r':
             record =!record;
             
@@ -359,9 +408,6 @@ void ofApp::windowResized(int w, int h)
 
 
 
-
-
-
 bool ofApp::checkPointWithinLimits(ofVec3f point)
 {
     bool itsIn = false;
@@ -373,91 +419,6 @@ bool ofApp::checkPointWithinLimits(ofVec3f point)
     
     return itsIn;
 }
-
-
-/*
-
-void saveSceneConfig(std::string name, Scene *s){
-    ofFile file(name + ".txt", ofFile::WriteOnly);
-    file << s->x << " " << s->y << " ";
-    file << s->scale << " " << s->scalex << " " << s->scaley << " ";
-    file << s->rotate << " ";
-    file << s->r << " " << s->g << " " << s->b << " " << s->brightness;
-};
-
-*/
-
-
-/*
- 
- 
- 
-void ofApp::createNewPointFile()
-{
-    string name = ofGetTimestampString();
-    ofFile file(name + ".txt", ofFile::WriteOnly);
-    writingToFile = true;
-}
-
-
-void ofApp::addPointsToFile(ofVec3f point)
-{
-    string name = ofGetTimestampString();
-    ofFile file(name + ".txt", ofFile::WriteOnly);
-    file << "v(" << point.x << "," << point.y << "," << point.z << ")" <<endl;
- 
-}
-
-
-void ofApp::stopFileWrite()
-    {
-        writingToFile = false;
-    }
-
-
-
-
-void createNewPointFile();
-void addPointsToFile();
-void stopFileWrite();
-bool writingToFile = false;
-*/
-
-
-
-
-
-
-void ofApp::createNewPointFile()
-{
-    string name = ofGetTimestampString();
-    ofFile file(name + ".txt", ofFile::WriteOnly);
-    writingToFile = true;
-}
-
-
-void ofApp::addPointsToFile(ofVec3f point)
-{
-    string name = ofGetTimestampString();
-    ofFile file(name + ".txt", ofFile::WriteOnly);
-    file << "v(" << point.x << "," << point.y << "," << point.z << ")" <<endl;
-    
-}
-
-
-void ofApp::stopFileWrite()
-{
-    writingToFile = false;
-}
-
-
-
-
-
-void ofApp::recordMesh()
-     {
-         trackingMesh.save( "generativeMesh/mesh.ply");
-     }
 
 
 

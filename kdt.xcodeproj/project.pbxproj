@@ -1688,6 +1688,13 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_51)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_52)",
 					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOpenCv/libs/opencv/lib/osx,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/MacOS/Debug,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/MacOS/Debug32,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/MacOS/Release,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/MacOS/Release32,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/x64/VS2010,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/x64/VS2012,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/x64/VS2013,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)Debug";
 				WRAPPER_EXTENSION = app;
@@ -1816,6 +1823,13 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_50)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_51)",
 					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOpenCv/libs/opencv/lib/osx,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/MacOS/Debug,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/MacOS/Debug32,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/MacOS/Release,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/MacOS/Release32,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/x64/VS2010,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/x64/VS2012,
+					/Users/mohithingorani/Documents/OpenFrameworks/of_v0.8.4_osx_release/addons/ofxOculusDK2/libs/LibOVR/Lib/x64/VS2013,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;

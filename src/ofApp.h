@@ -55,6 +55,9 @@ public:
     void stopFileWrite();
     bool writingToFile = false;
     
+    float calculateCorrectedMean(Mat stripMat);
+    
+    
     
 	ofxKinect kinect;
     ofEasyCam easyCam;
@@ -70,6 +73,7 @@ public:
     ofMesh trackingMesh;
     ofMesh tempMesh;
     
+    ofImage droneImage;
     
     
     
@@ -108,6 +112,20 @@ public:
     float kBackThreshold;
     bool  isTrackingOn;
     bool record =false;
+    
+    float stripWidth = 5;
+    
+    
+    vector<cv::Rect> droneRects;
+    
+    vector<Mat> droneMats;
+    
+    Mat kinectThresholdMat;
+    
+    
+    vector<vector< Scalar > > globalDroneAverages;
+    
+    
     
     
 
