@@ -47,6 +47,7 @@ public:
 	void windowResized(int w, int h);
     void recordMesh();
     bool checkPointWithinLimits( ofVec3f point);
+    void calculateAngle( vector< Scalar > grads );
     
     
     //void writePointsToFile();
@@ -124,6 +125,7 @@ public:
     
     
     vector<vector< Scalar > > globalDroneAverages;
+    vector<vector< Scalar > > globalGradients;
     
     
     

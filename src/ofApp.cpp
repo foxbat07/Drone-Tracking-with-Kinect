@@ -1,7 +1,7 @@
 #include "ofApp.h"
 //--------------------------------------------------------------
 void ofApp::setup() {
-	ofSetLogLevel(OF_LOG_VERBOSE);
+	ofSetLogLevel(OF_LOG_ERROR);
 	// enable depth->video image calibration
 	kinect.setRegistration(true);    
 	kinect.init();
@@ -197,8 +197,11 @@ void ofApp::update() {
     droneRects =  contourFinder.getBoundingRects();
     
     kinectThresholdMat = toCv(kinectThresholdedImage.getPixelsRef());
+    
     droneMats.clear();
     globalDroneAverages.clear();
+    globalGradients.clear();
+    
 
     
     for ( int i = 0 ; i < droneRects.size() ; i++ )
@@ -215,15 +218,19 @@ void ofApp::update() {
     {
         
         vector< Scalar > droneAverages;
+        vector<Scalar >  localGradients;
+        
         vector<Mat> droneAverageMats;
         droneAverages.clear();
+        localGradients.clear();
         
         Scalar oldAvg( 0);
         Scalar curAvg;
         Scalar gradient;
+        float tempAngle;
+        
         
         cout<<endl<< "gradient: ";
-
         
         for ( int j = 0 ; j< droneMats[i].cols- int(stripWidth)  ; j+= int(stripWidth) )
         {
@@ -231,20 +238,27 @@ void ofApp::update() {
             
             droneMats[i]( cv::Rect(j,0,int(stripWidth) ,droneMats[i].rows-1)).copyTo(tempMat);
             
+            blur(tempMat, 3);
             curAvg = mean(tempMat);
-            
             droneAverages.push_back( curAvg );
             
             gradient = curAvg - oldAvg;
-            cout<<" " << gradient.val[0];
             
-            globalDroneAverages.push_back(droneAverages);
+            
+            if ( j!=0 )
+                localGradients.push_back(gradient);
             //droneAverages.push_back(  mean(droneMats[i]( cv::Rect(j,0,5,droneMats[i].rows) ) ) ) ;
             
             
             oldAvg = curAvg;
             
         }
+        if ( localGradients.size()> 3)
+           calculateAngle(localGradients);
+        
+        globalGradients.push_back(localGradients);        
+        globalDroneAverages.push_back(droneAverages);
+ 
         
         
     }
@@ -273,6 +287,7 @@ void ofApp::draw() {
     ofTranslate(0,0);
     contourFinder.draw();
     ofPopMatrix();
+    cout<<endl <<"cf size:  " << contourFinder.size();
     
     /*
     if ( droneRects.size()!=0)
@@ -420,6 +435,38 @@ bool ofApp::checkPointWithinLimits(ofVec3f point)
     return itsIn;
 }
 
+
+
+
+void ofApp::calculateAngle( vector< Scalar > grads )
+{
+    
+    //float angle = 0 ;
+    //int switchAt = 0 ;
+    
+    vector<int> switchAt;
+    vector<float> angle;
+    switchAt.clear();
+    angle.clear();
+    
+    for ( int  i = 0 ; i < grads.size() -1  ; i++ )
+        {
+            
+            if ( ( grads[i].val[0] > 0 && grads[i + 1].val[0] < 0 )  || (grads[i].val[0] < 0 && grads[i + 1].val[0] > 0 )  )
+                {
+                    switchAt.push_back(i);
+                    switchAt.push_back( float ( i/grads.size() ));
+                    cout<<"switch at: "<< i ;
+                    
+                }
+            
+            
+        }
+    
+    if(angle.size()> 0 )
+        cout<<endl <<"angle:   "<<angle[0] ;
+    
+}
 
 
 
