@@ -49,7 +49,7 @@ public:
     bool checkPointWithinLimits( ofVec3f point);
     void calculateAngle( vector< Scalar > grads );
     
-    
+    double medianMat(Mat hist);
     //void writePointsToFile();
     void createNewPointFile();
     void addPointsToFile(ofVec3f point);
@@ -88,7 +88,7 @@ public:
 	
 	int w = 640;
 	int h = 480;
-	int angle;
+    int kinectAngle;
 
     
     int step =7;
@@ -128,6 +128,10 @@ public:
     vector<vector< Scalar > > globalGradients;
     
     
+    
+    
+    vector<int> switchAt;
+    vector<float> angle;
     
     
 
