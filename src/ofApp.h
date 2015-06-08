@@ -148,6 +148,7 @@ public:
     vector< ofVec3f > droneWC ;
     
     
+    vector<cv::Rect> droneRectsFiltered;
     
     
     vector<int> switchAt;

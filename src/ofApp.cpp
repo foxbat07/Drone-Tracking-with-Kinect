@@ -330,6 +330,8 @@ void ofApp::calculateDroneGradientUsingDepth()
     switchAt.clear();
     angle.clear();
     dronePositionVector.clear();
+    droneRectsFiltered.clear();
+    
     
     
     
@@ -341,13 +343,12 @@ void ofApp::calculateDroneGradientUsingDepth()
         kinectThresholdMat(droneRects[i]).copyTo(tempMat);
         cv::Point dronePos =  droneRects[i].tl();
         
-        
-        
         if ( tempMat.cols > 2 * tempMat.rows )              // to ensure that only the drone shows
         {
             dronePositionVector.push_back(dronePos);
             droneMats.push_back(tempMat);
-
+            droneRectsFiltered.push_back(droneRects[i]);
+            
         }
         
     }
@@ -465,7 +466,8 @@ void ofApp::drawDebugView()
     //ofTranslate(640,0);
     for ( int i = 0 ; i < droneMats.size(); i++)
     {
-        drawMat(droneMats[i], 640, i * 200);
+        drawMat(droneMats[i], 640, i * 200 + 20 );
+        drawMat(droneColorMats[i], 640+ 300 , i * 200 + 20 );
         
         ofSetColor(0, 100,200 );
         ofTranslate(640 , i* 200 );
@@ -614,17 +616,19 @@ void ofApp::calculateOrientationUsingColor()
 {
     droneColorMats.clear();
     
-    if ( droneMats.size()> 0)
+    if ( droneRectsFiltered.size()> 0)
     {
-        for ( int i = 0 ; i < droneMats.size() ; i++ )
+        for ( int i = 0 ; i < droneRectsFiltered.size() ; i++ )
         {
             //droneMats[i] = kinectThresholdMat(droneRects[i]);
             Mat tempMat;
-            
-            droneColorMat(droneRects[i]).copyTo(tempMat);
+            droneColorMat(droneRectsFiltered[i]).copyTo(tempMat);
             droneColorMats.push_back(tempMat);
             
         }
+        
+        
+    
         
         
         
