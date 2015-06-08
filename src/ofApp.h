@@ -48,6 +48,16 @@ public:
     void recordMesh();
     bool checkPointWithinLimits( ofVec3f point);
     void calculateAngle( vector< Scalar > grads );
+    void calculateDroneGradientUsingDepth();
+    void drawDebugView();
+    void setupofxUIGUI();
+    void setupInitialParameters();
+    void drawSecondWindow();
+    
+    
+    
+    ofVec3f calculateWorldCoordiante ( int x , int  y );
+    
     
     double medianMat(Mat hist);
     //void writePointsToFile();
@@ -75,6 +85,8 @@ public:
     ofMesh tempMesh;
     
     ofImage droneImage;
+    ofImage droneColorImage;
+    
     
     
     
@@ -126,6 +138,8 @@ public:
     
     vector<vector< Scalar > > globalDroneAverages;
     vector<vector< Scalar > > globalGradients;
+    vector<cv::Point> dronePositionVector;
+    vector< ofVec3f > droneWC ;
     
     
     
