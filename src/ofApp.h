@@ -54,6 +54,9 @@ public:
     void setupInitialParameters();
     void drawSecondWindow();
     
+    void calculateOrientationUsingColor();
+    
+    
     
     
     ofVec3f calculateWorldCoordiante ( int x , int  y );
@@ -86,6 +89,7 @@ public:
     
     ofImage droneImage;
     ofImage droneColorImage;
+    Mat     droneColorMat;
     
     
     
@@ -132,6 +136,8 @@ public:
     vector<cv::Rect> droneRects;
     
     vector<Mat> droneMats;
+    vector<Mat> droneColorMats;
+    
     
     Mat kinectThresholdMat;
     

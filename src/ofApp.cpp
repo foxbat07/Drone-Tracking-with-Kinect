@@ -107,6 +107,13 @@ void ofApp::update() {
     }
     
     kinectDepthImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
+    
+    droneColorImage =kinect.getPixelsRef() ;
+    droneColorMat   = toCv(droneColorImage.getPixelsRef());
+    
+    
+    
+    
     kinectThresholdedImage = kinectDepthImage;
     
     kinectThresholdedImage.threshold(nearThreshold,true);
@@ -130,6 +137,9 @@ void ofApp::update() {
 
     
     calculateDroneGradientUsingDepth();
+    calculateOrientationUsingColor();
+    
+    
     
     
     
@@ -329,8 +339,6 @@ void ofApp::calculateDroneGradientUsingDepth()
         //droneMats[i] = kinectThresholdMat(droneRects[i]);
         Mat tempMat;
         kinectThresholdMat(droneRects[i]).copyTo(tempMat);
-        kinectThresholdMat(droneRects[i]).copyTo(tempMat);
-        
         cv::Point dronePos =  droneRects[i].tl();
         
         
@@ -398,8 +406,6 @@ void ofApp::calculateDroneGradientUsingDepth()
         globalGradients.push_back(localGradients);
         globalDroneAverages.push_back(droneAverages);
         
-        
-        
     }
     
     
@@ -409,7 +415,7 @@ void ofApp::calculateDroneGradientUsingDepth()
         
         for ( int  i = 0  ; i< droneMats.size() ; i ++)
         {
-            ofVec3f cvg = calculateWorldCoordiante( dronePositionVector[i].x +  droneMats[i].rows/2 , dronePositionVector[i].y +  droneMats[i].cols/2  );   //need to fix, find droneMat actual position
+            ofVec3f cvg = calculateWorldCoordiante( dronePositionVector[i].x +  droneMats[i].cols/2 , dronePositionVector[i].y +  droneMats[i].rows/2  );   //need to fix, find droneMat actual position
             
             cout<<endl <<"point in space:  "<<cvg.x<<"  "<<cvg.y<<"  "<<cvg.z << endl;
             
@@ -421,11 +427,6 @@ void ofApp::calculateDroneGradientUsingDepth()
     }
 
     
-    
-    
-
-    
-    
     //cout<<endl<<"size of the vector: " << globalDroneAverages.size() << endl;
 }
 
@@ -435,6 +436,8 @@ void ofApp::calculateDroneGradientUsingDepth()
 
 void ofApp::drawDebugView()
 {
+    
+    
     kinectThresholdedImage.draw(0,0);
     kinectDepthImage.draw(0,480);
     kinect.draw(640, 480, 640, 480);
@@ -488,9 +491,8 @@ void ofApp::drawDebugView()
             ofDrawBitmapString("angle: " + ofToString( angle[i] ), ofGetScreenWidth() - 200,60 + 20 * i );
             ofDrawBitmapString("switch at: " + ofToString( switchAt[i] ), ofGetScreenWidth() - 200,120 + 20 * i );
             
-            
-            //ofDrawBitmapString("drone in world coordinate: " + ofToString(  droneWC[i].x) + "  "+ ofToString(  droneWC[i].y) + "  "+ ofToString(  droneWC[i].z ) + "  ", ofGetScreenWidth() - 200, 240 + 20 * i );
-            
+            if ( droneWC.size() >0 )
+            ofDrawBitmapString("drone WC: " + ofToString(  droneWC[i].x) + "  "+ ofToString(  droneWC[i].y) + "  "+ ofToString(  droneWC[i].z ) + "  ", ofGetScreenWidth() - 400, 240 + 20 * i );
             
         }
         
@@ -606,6 +608,35 @@ void ofApp::drawSecondWindow()
 
     }
 
+
+
+void ofApp::calculateOrientationUsingColor()
+{
+    droneColorMats.clear();
+    
+    if ( droneMats.size()> 0)
+    {
+        for ( int i = 0 ; i < droneMats.size() ; i++ )
+        {
+            //droneMats[i] = kinectThresholdMat(droneRects[i]);
+            Mat tempMat;
+            
+            droneColorMat(droneRects[i]).copyTo(tempMat);
+            droneColorMats.push_back(tempMat);
+            
+        }
+        
+        
+        
+        
+        
+        
+        
+    }
+    
+    
+    
+}
 
 
 
