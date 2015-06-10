@@ -10,7 +10,7 @@ void ofApp::setup() {
     kinect.open();		// opens first available kinect
     
     // droneImage.loadImage("droneImage.jpg");
-    //debugWindow.setup("debug Window", 0, 0, 1280/2, 960/2, false);
+    debugWindow.setup("Drone Space", 0, 0, 1920, 1080, false);
     
     setupInitialParameters();
     
@@ -41,25 +41,17 @@ void ofApp::setup() {
     // start from the front
     bDrawPointCloud = true;
     kinect.update();
-    mesh.setMode(OF_PRIMITIVE_POINTS);
-    trackingMesh.setMode(OF_PRIMITIVE_POINTS);
-    tempMesh.setMode(OF_PRIMITIVE_POINTS);
-    
-    
-    for ( int i = 0 ; i< w ; i++)
-    {
-        for ( int j = 0 ; j< h ; j++)
-        {
-            ofColor c = kinect.getColorAt(i, j);
-            mesh.addColor(c);
-            mesh.addVertex(kinect.getWorldCoordinateAt(i, j)*10);
-        }
-    }
-    int noOfVertices = mesh.getNumVertices();
-    cout<< "number of vertices are:"<< noOfVertices;
-    
+    mesh.clear();
+    mesh.setMode(OF_PRIMITIVE_LINE_STRIP);
+   // mesh.setMode(OF_PRIMI)
+    //dronePathVector.clear();
     
     setupofxUIGUI();
+    
+    ofVec3f testPoint1 = ofVec3f(0,0,0);
+    ofVec3f testPoint2 = ofVec3f(400,400,400);
+    //mesh.addVertex(testPoint1);
+    //mesh.addVertex(testPoint2);
     
     
     
@@ -78,70 +70,11 @@ void ofApp::update() {
     
     
     
-    mesh.clearVertices();
-    mesh.clearColors();
-    
     kinect.update();
-    //trackingMesh.append(mesh);
-    for ( int i = 0 ; i< w ; i++)
-    {
-        for ( int j = 0 ; j< h ; j++)
-        {
-            bool isItIn = false;
-            isItIn = checkPointWithinLimits( kinect.getWorldCoordinateAt(i, j) );
-            if( isItIn == true)
-            {
-                ofColor c ;
-                c.setHsb(kinect.getWorldCoordinateAt(i, j).z /colorMapping, 255, 255 );
-                
-                //mesh.setColor(j*w+i ,c);
-                //mesh.setVertex( j* w + i  , kinect.getWorldCoordinateAt(i, j) );
-                
-                mesh.addColor(c);
-                mesh.addVertex(kinect.getWorldCoordinateAt(i, j) );
-            }
-            
-            
-        }
-        
-    }
     
-    kinectDepthImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
-    
-    droneColorImage =kinect.getPixelsRef() ;
-    droneColorMat   = toCv(droneColorImage.getPixelsRef());
-    
-    
-    
-    
-    kinectThresholdedImage = kinectDepthImage;
-    
-    kinectThresholdedImage.threshold(nearThreshold,true);
-    kinectThresholdedImage.threshold(farThreshold,true);
-    
-    contourFinder.setMinArea(minArea);
-    contourFinder.setMaxArea(maxArea);
-    contourFinder.setThreshold(threshold);
-    contourFinder.getTracker().setPersistence(persistence);
-    contourFinder.getTracker().setMaximumDistance(maxDistance);
-    
-    // determine found contours
-    //kinectThresholdedImage.invert();
-    
-    contourFinder.findContours(kinectThresholdedImage);
-    //contourFinder.findContours(kinectDepthImage);
-    droneRects =  contourFinder.getBoundingRects();
-    
-    //kinectThresholdMat = toCv(kinectThresholdedImage.getPixelsRef());
-    kinectThresholdMat = toCv(kinectDepthImage.getPixelsRef());   // use the full depth image
-
-    
+    contourFinderFunction();
     calculateDroneGradientUsingDepth();
     calculateOrientationUsingColor();
-    
-    
-    
-    
     
     
     //    contourFinder.size();
@@ -156,14 +89,18 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
+    ofBackground(0);
     
+    easyCam.begin();
+    drawSecondWindow();
+    easyCam.end();
+    
+    //ofDrawBitmapString( ofToString(record) , 20, 400);
+    
+    debugWindow.begin();
+    ofBackground(128,128);
     drawDebugView();
-    
-    
-    ofPopMatrix();
-    ofDrawBitmapString( ofToString(record) , 20, 400);
-    
-    //drawSecondWindow();
+    debugWindow.end();
     
     }
 
@@ -293,10 +230,10 @@ void ofApp::calculateAngle( vector< Scalar > grads )
             switchAt.push_back(i);
             
             float actualAngle = ofMap( float(i) / float ( grads.size()  ) , 0, 1, 0, 180);
-            cout<<endl <<"angle: "<<actualAngle ;
+            //cout<<endl <<"angle: "<<actualAngle ;
             
             angle.push_back( float (actualAngle));
-            cout<<"switch at: "<< i;
+            //cout<<"switch at: "<< i;
             
         }
         
@@ -375,7 +312,7 @@ void ofApp::calculateDroneGradientUsingDepth()
         float tempAngle;
         
         
-        cout<<endl<< "gradient: ";
+        //cout<<endl<< "gradient: ";
         
         for ( int j = 0 ; j< droneMats[i].cols- int(stripWidth)  ; j+= int(stripWidth) )
         {
@@ -420,7 +357,18 @@ void ofApp::calculateDroneGradientUsingDepth()
             
             cout<<endl <<"point in space:  "<<cvg.x<<"  "<<cvg.y<<"  "<<cvg.z << endl;
             
+            int scaleXY = 5;
+            int scaleZ = 5;
             droneWC.push_back(cvg);
+            cvg.z = cvg.z/scaleZ;
+            cvg.y = -cvg.y/scaleXY;
+            cvg.x = -cvg.x/scaleXY;
+
+            if ( cvg.x !=0.0f && cvg.y !=0.0f && cvg.z !=0.0f )
+                mesh.addVertex(cvg);
+            //dronePathVector.push_back(cvg);
+            
+            
             
             
         }
@@ -442,7 +390,6 @@ void ofApp::drawDebugView()
     kinectThresholdedImage.draw(0,0);
     kinectDepthImage.draw(0,480);
     kinect.draw(640, 480, 640, 480);
-    
     
     ofPushMatrix();
     ofTranslate(0,0);
@@ -469,18 +416,31 @@ void ofApp::drawDebugView()
         drawMat(droneMats[i], 640, i * 200 + 20 );
         drawMat(droneColorMats[i], 640+ 300 , i * 200 + 20 );
         
+        for ( int i = 0;i < color_id.size() ; i++ )
+        {
+            ofDrawBitmapString( ofToString(  color_id[i] ) , 640+300 + 20 * i , 400 );
+        }
+        
+        ofPushMatrix();
         ofSetColor(0, 100,200 );
         ofTranslate(640 , i* 200 );
         ofSetLineWidth(5);
         if ( switchAt.size() >0  && droneMats[i].rows > 0 )
             ofLine(stripWidth * switchAt[i] , 0, stripWidth * switchAt[i], droneMats[i].rows );
+        ofTranslate(300, 0);
+        
+        if ( global_changes[i].size()> 0 )
+            ofLine(global_changes[i][0]  , 0, global_changes[i][0] , droneColorMats[i].rows );
+        
         //ofLine(stripWidth  , 0, stripWidth , droneMats[i].rows );
+        ofPopMatrix();
         
         ofSetColor(255);
     }
     
     ofPopMatrix();
-    
+    //ofDrawBox(400,400, -300, 300, 300, 300);
+
     if ( droneMats.size() >0 )
     {
         ofDrawBitmapString("number of contours: " + ofToString( contourFinder.size() ), ofGetScreenWidth() - 200, 40);
@@ -503,6 +463,8 @@ void ofApp::drawDebugView()
     
     
 }
+
+
 void ofApp::setupofxUIGUI()
 {
     
@@ -529,7 +491,7 @@ void ofApp::setupofxUIGUI()
     gui1->addSlider("right Threshold", -1000, 0, &kRightThreshold);
     gui1->addSlider("colorMapping", 10, 2000, &colorMapping);
     
-    gui1->addSlider("strip width", 2, 10,  &stripWidth );
+    gui1->addSlider("strip width", 2, 20,  &stripWidth );
     
     gui1->addToggle("isTrackingOn", false);
     
@@ -588,30 +550,31 @@ void ofApp::setupInitialParameters()
 
 void ofApp::drawSecondWindow()
     {
-    debugWindow.begin();
-    ofBackground(0, 0, 0);
-    glPointSize(1);
-    //glLineWidth(1);
-    easyCam.begin();
+
+        
+    ofFill();
+    ofSetColor(255, 255, 255,100);
+    //ofLine(0, 0, 200, 200);
+        
+    //drawDronePath();
+    ofSetColor( 255 );
+    ofNoFill();
+    int bs = 500;
+    
+    ofDrawBox(0,0,0 , bs,bs,bs);
     ofPushMatrix();
-    ofScale(1, -1, -1);
-    //ofTranslate( 0 ,0 ,0);
-
-    //ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
-    ofEnableDepthTest();
+    //ofTranslate( ofGetWindowWidth()/2,ofGetWindowHeight()/2 , -200 );
+    ofSetColor(20, 150, 200,200);
     mesh.draw();
-    //kinect.draw(0, 0, 640, 480);
-    //kinect.drawDepth(0, 0, 640, 480);
-
-    ofDisableDepthTest();
     ofPopMatrix();
-    easyCam.end();
-    debugWindow.end();
-
+    ofSetColor( 255);
+    
+        
+    
     }
 
 
-
+/*
 void ofApp::calculateOrientationUsingColor()
 {
     droneColorMats.clear();
@@ -627,20 +590,163 @@ void ofApp::calculateOrientationUsingColor()
             
         }
         
-        
     
-        
-        
-        
-        
-        
-        
         
     }
     
     
     
 }
+
+
+*/
+
+
+void ofApp::calculateOrientationUsingColor()
+{
+    droneColorMats.clear();
+    global_changes.clear();
+    
+    //Define Color Ranges
+    //Scalar h_min0 = Scalar(0,100,150) ; Scalar h_max0 = Scalar(255,255,255);
+    Scalar h_min1 = Scalar(0,100,162) ; Scalar h_max1 = Scalar(18,204,255);  // red 0+1
+    Scalar h_min2 = Scalar(26,107,42) ; Scalar h_max2 = Scalar(36,204,255); // yellow
+    Scalar h_min3 = Scalar(82,56, 42) ; Scalar h_max3 = Scalar(109,111,255);        //blue
+    Scalar h_min4 = Scalar(50,16, 102) ; Scalar h_max4 = Scalar(90,102,172);        //green
+    
+    
+    if ( droneRectsFiltered.size()> 0)
+    {
+        for ( int i = 0 ; i < droneRectsFiltered.size() ; i++ )
+        {
+            //droneMats[i] = kinectThresholdMat(droneRects[i]);
+            Mat tempMat;
+            droneColorMat(droneRectsFiltered[i]).copyTo(tempMat);
+            droneColorMats.push_back(tempMat);
+            
+        }
+        
+        for( int i = 0 ; i < droneRectsFiltered.size() ; i++ )
+        {
+            Mat HSV;
+            color_id.clear();
+            
+            cvtColor(droneColorMats[i],HSV,CV_BGR2HSV);
+                        std::vector<int> change_indexes;
+            int old_color;
+            
+            
+            int startValue = int(stripWidth) * 2 ;
+            for ( int j = startValue ; j< droneColorMats[i].cols- int(stripWidth)  ; j+= int(stripWidth) )
+            {
+                Mat tempMat;
+                Mat threshold0, threshold1, threshold2, threshold3, threshold4 ;
+                std::vector<int> n_colors;
+                int color;
+                
+            
+        
+                HSV( cv::Rect(j, droneMats[i].rows/4,int(stripWidth) ,droneMats[i].rows/2)).copyTo(tempMat);
+                
+               // inRange(tempMat, h_min0, h_max0, threshold0);
+                inRange(tempMat, h_min1, h_max1, threshold1);
+                inRange(tempMat, h_min2, h_max2, threshold2);
+                inRange(tempMat, h_min3, h_max3, threshold3);
+                inRange(tempMat, h_min4, h_max4, threshold4);
+                
+                
+                n_colors.push_back(countNonZero(threshold1) );
+                n_colors.push_back(countNonZero(threshold2));
+                n_colors.push_back(countNonZero(threshold3));
+                n_colors.push_back(countNonZero(threshold4));
+                
+                color = max_element(n_colors.begin(),n_colors.end()) - n_colors.begin();
+                
+                if(color != old_color && j > startValue)
+                    change_indexes.push_back(j);
+                
+                color_id.push_back(color);
+                old_color = color;
+                //cout << "Color "<< j << " is:" << color<<endl;
+                
+            }
+            
+            
+            int max = 0;
+            int second_common = -1;
+            int most_common = -1;
+            int max_old;
+            map<int,int> m;
+            for (auto vi = color_id.begin(); vi != color_id.end(); vi++) {
+                m[*vi]++;
+                if (m[*vi] > max) {
+                    max = m[*vi];
+                    if(max_old!=max)
+                        second_common = most_common;
+                    most_common = *vi;
+                    max_old = max;
+                }
+            }
+            
+            ///cout<<endl<<"Most Common:" << most_common << endl<<"Second Common:" << second_common;
+            
+            
+            //Define global_changes as vector< vector< int > > ;
+            global_changes.push_back(change_indexes);
+            
+
+        }
+    }
+}
+
+
+
+void ofApp::drawDronePath()
+{
+  
+    ofSetColor( 255,0,0 );
+    ofFill();
+    ofDrawBox(400,400, 0, 300, 300, 300);
+    ofPushMatrix();
+    mesh.draw();
+    ofPopMatrix();
+    ofSetColor( 255);
+
+    
+    
+}
+
+
+
+void ofApp::contourFinderFunction()
+{
+    kinectDepthImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
+    
+    droneColorImage =kinect.getPixelsRef() ;
+    droneColorMat   = toCv(droneColorImage.getPixelsRef());
+    kinectThresholdedImage = kinectDepthImage;
+    
+    kinectThresholdedImage.threshold(nearThreshold,true);
+    kinectThresholdedImage.threshold(farThreshold,true);
+    
+    contourFinder.setMinArea(minArea);
+    contourFinder.setMaxArea(maxArea);
+    contourFinder.setThreshold(threshold);
+    contourFinder.getTracker().setPersistence(persistence);
+    contourFinder.getTracker().setMaximumDistance(maxDistance);
+    
+    // determine found contours
+    //kinectThresholdedImage.invert();
+    
+    contourFinder.findContours(kinectThresholdedImage);
+    //contourFinder.findContours(kinectDepthImage);
+    droneRects =  contourFinder.getBoundingRects();
+    
+    //kinectThresholdMat = toCv(kinectThresholdedImage.getPixelsRef());
+    kinectThresholdMat = toCv(kinectDepthImage.getPixelsRef());   // use the full depth image
+
+}
+
 
 
 

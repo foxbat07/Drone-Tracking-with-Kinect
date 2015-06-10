@@ -55,6 +55,11 @@ public:
     void drawSecondWindow();
     
     void calculateOrientationUsingColor();
+    void drawDronePath();
+    
+    void contourFinderFunction();
+    
+    
     
     
     
@@ -84,14 +89,13 @@ public:
     ofxSecondWindow debugWindow;
     ofxUICanvas *gui1;
     ofMesh mesh;
-    ofMesh trackingMesh;
-    ofMesh tempMesh;
-    
+  
     ofImage droneImage;
     ofImage droneColorImage;
     Mat     droneColorMat;
     
-    
+    std::vector<int> color_id;
+
     
     
 #ifdef USE_TWO_KINECTS
@@ -130,7 +134,7 @@ public:
     bool  isTrackingOn;
     bool record =false;
     
-    float stripWidth = 5;
+    float stripWidth = 8;
     
     
     vector<cv::Rect> droneRects;
@@ -147,8 +151,13 @@ public:
     vector<cv::Point> dronePositionVector;
     vector< ofVec3f > droneWC ;
     
+    vector< ofVec3f > dronePathVector;
+    
+    
     
     vector<cv::Rect> droneRectsFiltered;
+    
+    vector< vector< int > >  global_changes; 
     
     
     vector<int> switchAt;
