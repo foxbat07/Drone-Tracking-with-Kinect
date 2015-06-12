@@ -24,11 +24,11 @@
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>37526DA425E5430474A14FBFA1BC4525160B5FC1</key>
-		<string>../../../addons/ofxCv</string>
+		<string>../../../../../addons/ofxCv</string>
 		<key>5F5760DC1D7D368197EA46F58434F82594C6401E</key>
-		<string>../../../addons/ofxSTL</string>
+		<string>../../../../../addons/ofxSTL</string>
 		<key>7E804D925461714118DB355C65BC964B41D94376</key>
-		<string>../../../addons/ofxUI</string>
+		<string>../../../../../addons/ofxUI</string>
 		<key>DA3DFDC75E53B2628E88A6AA4D7E0A83368B684D</key>
 		<string>../..</string>
 	</dict>

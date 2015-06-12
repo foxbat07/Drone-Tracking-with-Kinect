@@ -222,7 +222,7 @@ void ofApp::calculateAngle( vector< Scalar > grads )
     //switchAt.clear();
     //angle.clear();
     
-    for ( int  i = 0 ; i < grads.size() ; i++ )
+    for ( int  i = 1 ; i < grads.size() -1 ; i++ )      /// ignoring the first and last 1
     {
         
         if ( ( grads[i].val[0] > 0 && grads[i + 1].val[0] < 0 )  || (grads[i].val[0] < 0 && grads[i + 1].val[0] > 0 )  )
@@ -319,7 +319,7 @@ void ofApp::calculateDroneGradientUsingDepth()
             Mat tempMat;
             Mat tempHistogram;
             
-            droneMats[i]( cv::Rect(j,0,int(stripWidth) ,droneMats[i].rows-1)).copyTo(tempMat);
+            droneMats[i]( cv::Rect(j,droneMats[i].rows/4,int(stripWidth) ,droneMats[i].rows / 2)).copyTo(tempMat);
             
             blur(tempMat, 3);
             //curAvg = mean(tempMat);           // change of plans trying to use median
@@ -358,9 +358,9 @@ void ofApp::calculateDroneGradientUsingDepth()
             cout<<endl <<"point in space:  "<<cvg.x<<"  "<<cvg.y<<"  "<<cvg.z << endl;
             
             int scaleXY = 5;
-            int scaleZ = 5;
+            int scaleZ = 10;
             droneWC.push_back(cvg);
-            cvg.z = cvg.z/scaleZ;
+            cvg.z = (cvg.z-2000) /scaleZ;
             cvg.y = -cvg.y/scaleXY;
             cvg.x = -cvg.x/scaleXY;
 
@@ -415,11 +415,13 @@ void ofApp::drawDebugView()
     {
         drawMat(droneMats[i], 640, i * 200 + 20 );
         drawMat(droneColorMats[i], 640+ 300 , i * 200 + 20 );
-        
+        /*
         for ( int i = 0;i < color_id.size() ; i++ )
         {
             ofDrawBitmapString( ofToString(  color_id[i] ) , 640+300 + 20 * i , 400 );
         }
+         */
+        
         
         ofPushMatrix();
         ofSetColor(0, 100,200 );
@@ -550,27 +552,55 @@ void ofApp::setupInitialParameters()
 
 void ofApp::drawSecondWindow()
     {
-
-        
-    ofFill();
-    ofSetColor(255, 255, 255,100);
-    //ofLine(0, 0, 200, 200);
-        
+        ofPushMatrix();
+    
+        ofRotateY(ofGetFrameNum() * 0.05);
+    //creating bounding box
     //drawDronePath();
     ofSetColor( 255 );
     ofNoFill();
-    int bs = 500;
-    
+    ofSetLineWidth(1);
     ofDrawBox(0,0,0 , bs,bs,bs);
+    ofLine(0, 0, -bs/2 , 0,0,bs/2);
+    ofLine(0, -bs/2,0 , 0, bs/2 , 0 );
+    ofLine( -bs/2,0,0 , bs/2 ,0 ,0 );
+        
+    // creating drone path
     ofPushMatrix();
-    //ofTranslate( ofGetWindowWidth()/2,ofGetWindowHeight()/2 , -200 );
     ofSetColor(20, 150, 200,200);
+    ofSetLineWidth(4);
     mesh.draw();
     ofPopMatrix();
-    ofSetColor( 255);
+        
+    ofPushMatrix();
+     //   ofVec3f currentDronePosition = mesh.getVertex(mesh.getNumVertices());
+    
+    int numVertices = mesh.getNumVertices();
+    if ( numVertices > 3)
+        {
+        ofVec3f currentDronePosition = mesh.getVertex(numVertices -1 );
+            
+        
+        if( droneMats.size()  > 0  )
+            {
+            //ofRotate(angle[0], 0, 1, 0);
+            ofNoFill();
+            ofSetColor(255, 0,0 );
+            ofPushMatrix();
+            ofTranslate(currentDronePosition.x, currentDronePosition.y, currentDronePosition.z);
+            ofRotateY( previousAngle/2 + angle[0]/2 );   //taking average of two
+            ofDrawBox( 0,0,0 , droneW,droneH,droneW );
+            ofPushMatrix();
+            
+            previousAngle = angle[0];
+            }
+            
+        ofPopMatrix();
+                }
     
         
-    
+        ofSetColor( 255);
+        ofPopMatrix();
     }
 
 
@@ -667,7 +697,7 @@ void ofApp::calculateOrientationUsingColor()
                 
                 color_id.push_back(color);
                 old_color = color;
-                //cout << "Color "<< j << " is:" << color<<endl;
+                cout << "Color "<< j << " is:" << color<<endl;
                 
             }
             
@@ -675,20 +705,25 @@ void ofApp::calculateOrientationUsingColor()
             int max = 0;
             int second_common = -1;
             int most_common = -1;
+            int old_mc = -1;
             int max_old;
             map<int,int> m;
             for (auto vi = color_id.begin(); vi != color_id.end(); vi++) {
                 m[*vi]++;
                 if (m[*vi] > max) {
                     max = m[*vi];
-                    if(max_old!=max)
-                        second_common = most_common;
+                    //if(max_old!=max)
+                    //   second_common = most_common;
                     most_common = *vi;
+                    if(most_common != old_mc)
+                        second_common = most_common;
+                    old_mc = most_common;
+                    
                     max_old = max;
                 }
             }
             
-            ///cout<<endl<<"Most Common:" << most_common << endl<<"Second Common:" << second_common;
+            cout<<endl<<"Most Common:" << most_common << endl<<"Second Common:" << second_common;
             
             
             //Define global_changes as vector< vector< int > > ;

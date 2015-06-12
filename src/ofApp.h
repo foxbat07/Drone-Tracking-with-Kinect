@@ -163,6 +163,12 @@ public:
     vector<int> switchAt;
     vector<float> angle;
     
+    int bs = 500;
+    int droneW = 50;
+    int droneH = 10;
+    float previousAngle = 0 ;
+    
+    
     
 
 };
